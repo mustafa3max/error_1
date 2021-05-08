@@ -1,0 +1,78 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:platform_device_id/platform_device_id.dart';
+
+extension LoopList<T> on List {
+  T loop(int index) => this[index % this.length];
+}
+
+main()=>runApp(App());
+
+class App extends StatelessWidget {
+  const App({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Home(),
+    );
+  }
+}
+
+class Home extends StatefulWidget {
+  const Home({Key key}) : super(key: key);
+
+  @override
+  _HomeState createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  var _deviceId = "";
+  List<Color> _colors = [Colors.red, Colors.blue, Colors.green];
+
+  _initPlatformState() async {
+    String deviceId;
+    try {
+      deviceId = await PlatformDeviceId.getDeviceId;
+    } on PlatformException {
+      deviceId = 'Failed to get deviceId.';
+    }
+    if (!mounted) return;
+
+    setState(() {
+      _deviceId = deviceId;
+      print("deviceId->$_deviceId");
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _initPlatformState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Material(
+        child: PageView.builder(
+          scrollDirection: Axis.vertical,
+          itemCount: 3,
+          itemBuilder: (context, index) {
+            return PageView.builder(
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  color: _colors.loop(index),
+                  margin: EdgeInsets.all(5),
+                );
+              },
+            );
+          },
+        )
+      ),
+    );
+  }
+}
+
